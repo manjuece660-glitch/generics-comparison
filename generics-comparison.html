@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Java Generics Wildcards Comparison</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+    th { background-color: #f4f4f4; }
+    .yes { color: green; font-weight: bold; }
+    .no { color: red; font-weight: bold; }
+    h1 { color: #333; }
+  </style>
+</head>
+<body>
+  <h1>📊 Comparison of Wildcards and Type Parameters</h1>
+  <table>
+    <tr>
+      <th>Case</th>
+      <th>List&lt;? super Animal&gt;</th>
+      <th>List&lt;? extends Animal&gt;</th>
+      <th>&lt;S extends Animal&gt;</th>
+    </tr>
+    <tr>
+      <td><b>Meaning</b></td>
+      <td>List of Animal or its supertypes (Animal, Creature, Object)</td>
+      <td>List of Animal or its subtypes (Animal, Dog, Cat)</td>
+      <td>A concrete type chosen at compile time (e.g., S=Dog, S=Cat)</td>
+    </tr>
+    <tr>
+      <td><b>Write: add(new Animal(...))</b></td>
+      <td class="yes">✅ Allowed</td>
+      <td class="no">❌ Not allowed</td>
+      <td class="yes">✅ Allowed if S=Animal</td>
+    </tr>
+    <tr>
+      <td><b>Write: add(new Dog(...))</b></td>
+      <td class="yes">✅ Allowed</td>
+      <td class="no">❌ Not allowed</td>
+      <td class="yes">✅ Allowed if S=Dog</td>
+    </tr>
+    <tr>
+      <td><b>Write: add(new Cat(...))</b></td>
+      <td class="yes">✅ Allowed</td>
+      <td class="no">❌ Not allowed</td>
+      <td class="yes">✅ Allowed if S=Cat</td>
+    </tr>
+    <tr>
+      <td><b>Write: add(new Creature(...))</b></td>
+      <td class="no">❌ Not allowed</td>
+      <td class="no">❌ Not allowed</td>
+      <td class="no">❌ Not allowed (Creature not subtype of Animal)</td>
+    </tr>
+    <tr>
+      <td><b>Write: add(new Object())</b></td>
+      <td class="no">❌ Not allowed</td>
+      <td class="no">❌ Not allowed</td>
+      <td class="no">❌ Not allowed</td>
+    </tr>
+    <tr>
+      <td><b>Read: element = list.get(0)</b></td>
+      <td>Returns Object</td>
+      <td>Returns Animal</td>
+      <td>Returns S (exact type, e.g., Dog)</td>
+    </tr>
+    <tr>
+      <td><b>Safe usage pattern</b></td>
+      <td>Use when you want to consume/write Animals</td>
+      <td>Use when you want to produce/read Animals</td>
+      <td>Use when you want both read + write safely, but with a fixed subtype</td>
+    </tr>
+    <tr>
+      <td><b>Mnemonic</b></td>
+      <td>Consumer Super</td>
+      <td>Producer Extends</td>
+      <td>Specific subtype</td>
+    </tr>
+  </table>
+</body>
+</html>
