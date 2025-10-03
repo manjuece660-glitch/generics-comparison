@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Automatic Type Promotion in Java</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 20px;
+      background: #f9f9f9;
+      color: #333;
+    }
+    h1, h2, h3 {
+      color: #2c3e50;
+    }
+    pre {
+      background: #272822;
+      color: #f8f8f2;
+      padding: 12px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    code {
+      background: #eee;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    .output {
+      background: #ecf0f1;
+      padding: 10px;
+      border-left: 4px solid #3498db;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>Automatic Type Promotion in Java</h1>
+
+  <h2>🔑 Rules</h2>
+  <ol>
+    <li><b>Expression Promotion</b>: <code>byte</code>, <code>short</code>, <code>char</code> → <code>int</code>.  
+      If one operand is <code>long</code> → <code>long</code>,  
+      if <code>float</code> → <code>float</code>,  
+      if <code>double</code> → <code>double</code>.
+    </li>
+    <li><b>Mixed Type Operations</b>: smaller type is promoted to the larger type.</li>
+    <li><b>Method Overloading</b>: if no exact match, promotion happens step-by-step  
+      (<code>byte → short → int → long → float → double</code>).
+    </li>
+    <li><b>Chained Promotions</b>: promotion continues until a match is found.</li>
+  </ol>
+
+  <h2>🖥️ Example Program</h2>
+  <pre><code>class PromotionDemo {
+    // Overloaded methods
+    void test(int x) { System.out.println("int method called: " + x); }
+    void test(long x) { System.out.println("long method called: " + x); }
+    void test(float x) { System.out.println("float method called: " + x); }
+    void test(double x) { System.out.println("double method called: " + x); }
+
+    public static void main(String[] args) {
+        PromotionDemo demo = new PromotionDemo();
+
+        // 1. Expression Promotion
+        byte b1 = 10, b2 = 20;
+        int sum = b1 + b2;
+        System.out.println("byte + byte → int: " + sum);
+
+        char c = 'A'; // 65
+        int charResult = c + 1;
+        System.out.println("char + int → int: " + charResult);
+
+        short s1 = 5, s2 = 6;
+        int shortResult = s1 * s2;
+        System.out.println("short * short → int: " + shortResult);
+
+        // 2. Mixed Type
+        int i = 10;
+        long l = 20L;
+        float f = 3.5f;
+        double d = 2.7;
+
+        System.out.println("int + long → long: " + (i + l));
+        System.out.println("long + float → float: " + (l + f));
+        System.out.println("float + double → double: " + (f + d));
+
+        // 3. Overloading
+        demo.test(b1);
+        demo.test(c);
+        demo.test(s1);
+        demo.test(i);
+        demo.test(l);
+        demo.test(f);
+        demo.test(d);
+
+        // 4. Chained Promotions
+        demo.test(100);
+        demo.test(100L);
+        demo.test(100.0f);
+        demo.test(100.0);
+    }
+}</code></pre>
+
+  <h2>✅ Sample Output</h2>
+  <div class="output">
+    byte + byte → int: 30<br>
+    char + int → int: 66<br>
+    short * short → int: 30<br>
+    int + long → long: 30<br>
+    long + float → float: 23.5<br>
+    float + double → double: 6.2<br>
+    int method called: 10<br>
+    int method called: 65<br>
+    int method called: 5<br>
+    int method called: 10<br>
+    long method called: 20<br>
+    float method called: 3.5<br>
+    double method called: 2.7<br>
+    int method called: 100<br>
+    long method called: 100<br>
+    float method called: 100.0<br>
+    double method called: 100.0
+  </div>
+</body>
+</html>
