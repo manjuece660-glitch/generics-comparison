@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Java Generics Notes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f9f9f9;
+      color: #333;
+      line-height: 1.6;
+    }
+    h1, h2 {
+      color: #2c3e50;
+    }
+    .note {
+      background: #fff;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    nav {
+      margin-bottom: 20px;
+    }
+    nav a {
+      margin-right: 15px;
+      text-decoration: none;
+      color: #3498db;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="generics-comparison.html">Comparison Table</a>
+    <a href="generics-notes.html">Generics Notes</a>
+  </nav>
+
+  <h1>📘 Java Generics Notes</h1>
+
+  <div class="note"><b>1. Generics</b> → Generics are type placeholders that let you write code once and use it with many types. They add compile-time type safety and reduce casting.</div>
+
+  <div class="note"><b>2. Generic Class</b> → A class declared with a type parameter (e.g., <code>class Box&lt;T&gt;</code>). It can hold objects of any type T, chosen when creating the instance.</div>
+
+  <div class="note"><b>3. Generic Method</b> → A method with its own type parameter (e.g., <code>&lt;T&gt; void print(T item)</code>). It works with any type, independent of the class’s type parameter.</div>
+
+  <div class="note"><b>4. Generic Interface</b> → An interface that defines type parameters (e.g., <code>Comparable&lt;T&gt;</code>). Classes implementing it choose the specific type for T.</div>
+
+  <div class="note"><b>5. Bounded Type</b> → Restricts type parameters with <code>extends</code> or <code>super</code>. Example: <code>&lt;T extends Number&gt;</code> allows only Number and its subclasses.</div>
+
+  <div class="note"><b>6. Multiple Bounds</b> → A type parameter can extend a class and multiple interfaces. Example: <code>&lt;T extends Animal & Serializable & Runnable&gt;</code>.</div>
+
+  <div class="note"><b>7. Inheritance with Generics</b> → <code>Box&lt;Cat&gt;</code> is not a subtype of <code>Box&lt;Animal&gt;</code>. Generics are invariant, meaning type arguments must match exactly.</div>
+
+  <div class="note"><b>8. Subtyping</b> → Works only when type arguments are the same. For example, <code>List&lt;Integer&gt;</code> is not a subtype of <code>List&lt;Number&gt;</code>.</div>
+
+  <div class="note"><b>9. Wildcards</b> → <code>?</code> means an unknown type. <code>? extends T</code> → can read safely as T. <code>? super T</code> → can write T or its subtypes.</div>
+
+  <div class="note"><b>10. Producer Extends (? extends)</b> → Use when a collection produces data (you only read). Example: <code>List&lt;? extends Animal&gt;</code> → you can read as Animal.</div>
+
+  <div class="note"><b>11. Consumer Super (? super)</b> → Use when a collection consumes data (you only write). Example: <code>List&lt;? super Animal&gt;</code> → you can add Animal and its subtypes.</div>
+
+  <div class="note"><b>12. Type Parameter &lt;S extends T&gt;</b> → Useful when you want both read + write, keeping the same subtype. Example: <code>&lt;S extends Animal&gt; List&lt;S&gt; copy(List&lt;S&gt;)</code>.</div>
+
+  <div class="note"><b>13. Type Erasure</b> → Generics exist only at compile-time. At runtime, type info is erased (e.g., <code>List&lt;String&gt;</code> becomes raw <code>List</code>).</div>
+
+  <div class="note"><b>14. Raw Types</b> → Using collections without type arguments (e.g., <code>List list</code>). They are unsafe since they bypass compile-time checks.</div>
+
+  <div class="note"><b>15. Collections with Generics</b> → The most common use. Example: <code>List&lt;String&gt;</code> ensures only Strings are stored, preventing runtime <code>ClassCastException</code>.</div>
+
+</body>
+</html>
