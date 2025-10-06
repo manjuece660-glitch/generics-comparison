@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Checked vs Unchecked Custom Exceptions — When to Use</title>
+  <style>
+    :root{
+      --bg:#f8fafc; --card:#ffffff; --muted:#6b7280; --accent:#2563eb;
+      --border:#e6eefc; --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+    body{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); color:#111827; margin:0; padding:28px;}
+    .wrap{max-width:980px; margin:0 auto;}
+    header{display:flex; gap:16px; align-items:center; margin-bottom:18px;}
+    h1{font-size:20px;margin:0}
+    p.lead{color:var(--muted); margin:6px 0 18px;}
+    .card{background:var(--card); border:1px solid var(--border); border-radius:10px; padding:18px; box-shadow: 0 4px 14px rgba(37,99,235,0.04);}
+    table{width:100%; border-collapse:collapse; margin:6px 0 14px; font-size:14px;}
+    th,td{padding:10px; border:1px solid #e9eff6; text-align:left; vertical-align:top;}
+    th{background:#f1f7ff; color:#0b3a7d; font-weight:600;}
+    .example{background:#0b1220; color:#e6f0ff; padding:12px; border-radius:8px; font-family:var(--mono); font-size:13px; overflow:auto;}
+    .note{background:#fff7ed; border-left:4px solid #f59e0b; padding:10px; border-radius:6px; color:#92400e; margin-top:8px;}
+    footer{font-size:13px; color:var(--muted); margin-top:16px;}
+    .two-col{display:grid; grid-template-columns:1fr 320px; gap:18px;}
+    @media (max-width:880px){.two-col{grid-template-columns:1fr} header{flex-direction:column; align-items:flex-start}}
+    .btn{display:inline-block; background:var(--accent); color:white; text-decoration:none; padding:8px 12px; border-radius:8px; font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Checked vs Unchecked Custom Exceptions — When to Use</h1>
+        <p class="lead">Compact decision table and examples explaining when to design custom exceptions as checked (`Exception`) vs unchecked (`RuntimeException`).</p>
+      </div>
+      <div style="margin-left:auto">
+        <a class="btn" href="#table">Jump to table</a>
+      </div>
+    </header>
+
+    <div class="two-col">
+      <main class="card" id="table">
+        <h2 style="margin-top:0">Decision Table — When to use</h2>
+
+        <table aria-label="Checked vs Unchecked exceptions">
+          <thead>
+            <tr>
+              <th>Criterion</th>
+              <th>Checked custom exception <small>(<code>extends Exception</code>)</small></th>
+              <th>Unchecked custom exception <small>(<code>extends RuntimeException</code>)</small></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Primary semantics</strong></td>
+              <td>Signals a <em>recoverable / expected</em> condition the caller should handle.</td>
+              <td>Signals a <em>programming error</em> or an unexpected/unrecoverable condition.</td>
+            </tr>
+            <tr>
+              <td><strong>Caller responsibility</strong></td>
+              <td>Compiler forces callers to handle (<code>try/catch</code>) or declare (<code>throws</code>) — explicit contract.</td>
+              <td>No compile-time requirement; caller may choose to handle or ignore.</td>
+            </tr>
+            <tr>
+              <td><strong>Typical use-case</strong></td>
+              <td>I/O errors, validation failures where caller can reasonably recover (e.g. <code>FileFormatException</code>, <code>InsufficientFundsException</code>).</td>
+              <td>Illegal arguments, invariant violations, configuration faults, programming bugs (e.g. <code>InvalidConfigurationException</code>).</td>
+            </tr>
+            <tr>
+              <td><strong>API boundary guidance</strong></td>
+              <td>Use when you want to <strong>force</strong> API users to think about handling the condition (library methods with recoverable failure).</td>
+              <td>Use when exception indicates misuse or would add noise if forced to handle (frameworks often prefer unchecked).</td>
+            </tr>
+            <tr>
+              <td><strong>Method signature</strong></td>
+              <td><code>void foo() throws MyCheckedException</code> — part of the API contract.</td>
+              <td>No <code>throws</code> required; document behavior instead.</td>
+            </tr>
+            <tr>
+              <td><strong>Recoverability</strong></td>
+              <td>Usually recoverable; caller can retry, prompt user, choose alternative.</td>
+              <td>Usually not recoverable at throw site — requires code fix or global handling.</td>
+            </tr>
+            <tr>
+              <td><strong>Verbosity & ergonomics</strong></td>
+              <td>May cause many try/catch blocks — can harm API usability if overused.</td>
+              <td>Cleaner call sites; less boilerplate.</td>
+            </tr>
+            <tr>
+              <td><strong>Library trend</strong></td>
+              <td>Traditional Java libraries used checked exceptions (e.g., <code>IOException</code>).</td>
+              <td>Modern frameworks prefer unchecked (Spring converts SQL exceptions to unchecked wrappers).</td>
+            </tr>
+            <tr>
+              <td><strong>Example names</strong></td>
+              <td><code>FileFormatException</code>, <code>PaymentDeclinedException</code></td>
+              <td><code>InvalidConfigurationException</code>, <code>MissingDependencyException</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note">
+          <strong>Quick decision</strong>: <em>Checked</em> → when caller must consciously handle the condition to continue safely.  
+          <em>Unchecked</em> → when it signals a programming / configuration error or would cause noisy client code.
+        </div>
+
+        <h3 style="margin-top:16px">Short examples</h3>
+
+        <div style="margin-top:8px">
+          <strong>Checked custom exception</strong>
+          <div class="example" style="margin-top:8px">
+<pre>// definition
+public class FileFormatException extends Exception {
+  public FileFormatException(String msg){ super(msg); }
+  public FileFormatException(String msg, Throwable cause){ super(msg, cause); }
+}
+
+// usage (API)
+public List<Record> parse(File f) throws FileFormatException {
+  if (bad) throw new FileFormatException("malformed row 12");
+  return result;
+}
+
+// caller
+try {
+  parser.parse(file);
+} catch (FileFormatException e) {
+  // recover: notify user, skip file, ask for fix
+}</pre>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <strong>Unchecked custom exception</strong>
+          <div class="example" style="margin-top:8px">
+<pre>public class InvalidConfigurationException extends RuntimeException {
+  public InvalidConfigurationException(String msg){ super(msg); }
+}
+
+// usage
+public void init(Config cfg) {
+  if (cfg.get("host")==null) throw new InvalidConfigurationException("host is required");
+}</pre>
+          </div>
+        </div>
+
+        <h3 style="margin-top:14px">Guidelines checklist</h3>
+        <ul>
+          <li>Can the caller reasonably <em>recover</em>? → prefer <strong>checked</strong>.</li>
+          <li>Is this a programmer/precondition error? → prefer <strong>unchecked</strong>.</li>
+          <li>Will forcing checked exceptions produce noisy client code with little benefit? → prefer <strong>unchecked</strong> or a single higher-level checked exception.</li>
+          <li>Document and use exception chaining (pass cause) when wrapping/transforming exceptions.</li>
+        </ul>
+
+        <footer>
+          Best practice: choose a consistent policy for your library and document it. Use a small exception hierarchy (e.g. <code>StorageException</code> base) so callers can catch a logical group easily.
+        </footer>
+      </main>
+
+      <aside class="card" aria-label="Quick actions">
+        <h3 style="margin-top:0">Deploy instructions</h3>
+
+        <p class="lead" style="margin:6px 0 8px">Pick one: GitHub Pages (repo push) or Glitch editor.</p>
+
+        <h4>Git (recommended if you use GitHub Pages)</h4>
+        <ol>
+          <li>Place file at <code>generics-comparison/generics-notes.html</code> in your GitHub Pages repo (the repo that serves <code>manjuece660-glitch.github.io</code>).</li>
+          <li>Commands:
+            <pre style="font-family:var(--mono); font-size:13px; background:#fff; padding:8px; border-radius:6px;">
+git add generics-comparison/generics-notes.html
+git commit -m "Add checked vs unchecked exceptions notes"
+git push origin main
+            </pre>
+            (replace <code>main</code> with your default branch)
+          </li>
+          <li>Open: <code>https://manjuece660-glitch.github.io/generics-comparison/generics-notes.html</code></li>
+        </ol>
+
+        <h4>GitHub web UI</h4>
+        <ol>
+          <li>Go to repository that powers your Pages site (username.github.io).</li>
+          <li>Create folder <code>generics-comparison</code>, then upload new file &quot;generics-notes.html&quot; with the HTML content above.</li>
+          <li>Commit. Then open the target URL (same as above).</li>
+        </ol>
+
+        <h4>Glitch (if your site runs on Glitch)</h4>
+        <ol>
+          <li>Open your Glitch project editor (the project that serves your site).</li>
+          <li>Create a new file under <code>public/generics-comparison/generics-notes.html</code> (or at project root if you serve from root).</li>
+          <li>Paste the HTML and save. Glitch serves files live — open the URL path to verify.</li>
+        </ol>
+
+        <div style="margin-top:10px">
+          <strong>Note:</strong> I cannot push the file for you from here. If you want, paste the HTML into the Glitch editor and I can help adjust the content or styling further.
+        </div>
+      </aside>
+    </div>
+  </div>
+</body>
+</html>
